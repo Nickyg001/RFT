@@ -103,7 +103,7 @@
     async function populateMenu() {
       try {
         // Carica lista TV dalla cartella m3u
-        const tvRes = await fetch("m3u/iptvitaplus.m3u");
+        const tvRes = await fetch("https://cdn.jsdelivr.net/gh/Tundrak/IPTV-Italia@master/iptvitaplus.m3u");
         const tvText = await tvRes.text();
         const tvEntries = parseM3U(tvText);
 
@@ -123,7 +123,7 @@
         });
 
         // Carica lista Radio dalla cartella m3u
-        const radioRes = await fetch("m3u/iptvita.m3u");
+        const radioRes = await fetch("https://cdn.jsdelivr.net/gh/Tundrak/IPTV-Italia@master/iptvita.m3u");
         const radioText = await radioRes.text();
         const radioEntries = parseM3U(radioText);
 
@@ -163,3 +163,4 @@
   </script>
 </body>
 </html>
+
