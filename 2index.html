@@ -69,7 +69,7 @@
         const radioGroup = document.createElement("optgroup");
         radioGroup.label = "Radio Italiane";
 
-        // Carica lista TV (file locale)
+        // Carica lista TV (file locale su GitHub Pages)
         const tvRes = await fetch("m3u/iptvitaplus.m3u");
         const tvText = await tvRes.text();
         const tvEntries = parseM3U(tvText);
@@ -85,7 +85,7 @@
           tvGroup.appendChild(opt);
         });
 
-        // Carica lista Radio (file locale)
+        // Carica lista Radio (file locale su GitHub Pages)
         const radioRes = await fetch("m3u/ipradioita.m3u");
         const radioText = await radioRes.text();
         const radioEntries = parseM3U(radioText);
