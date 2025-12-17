@@ -41,10 +41,12 @@
       background: rgba(20,20,20,0.9);
       border-radius: 6px;
       padding: 6px;
-      max-height: 90vh;
+      max-height: 900px;
 	  width: max-content;
-      overflow-y: auto;
+      overflow-y: scroll;   /* invece di auto */
+	  -webkit-overflow-scrolling: touch; /* per browser basati su WebKit */
     }
+	
     #menu button {
       display: flex;
       align-items: center;
@@ -190,5 +192,3 @@
   </script>
 </body>
 </html>
-
-
