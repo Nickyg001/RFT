@@ -1,85 +1,171 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RFT Player</title>
-
-<!-- Video.js CSS -->
-<link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
-
-<style>
-    body {
-        margin: 0;
-        background: black;
-        font-family: Arial, sans-serif;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Stream Player TV</title>
+  <link href="https://vjs.zencdn.net/8.3.0/video-js.css" rel="stylesheet" />
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      background: #000;
+      font-family: sans-serif;
+	  overflow-y: scroll !important; 
+	  -webkit-overflow-scrolling: touch;
     }
+	.scroll-wrapper {
+	 height: 100vh;
+  	 overflow-y: auto;
+	}
 
-    /* Player fullscreen */
-    #video {
-        width: 100vw;
-        height: 100vh;
+    .video-js {
+      width: 100%;
+      height: 100vh;
     }
+    /* Dropdown menu */
+    #dropdown {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 10;
+    }
+    #dropdown button {
+      background: rgba(20,20,20,0.0);
+      color: #fff;
+	top: 50px;
+      border: none;
+      padding: 16px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    #menu {
+      display: none;
+      position: absolute;
+      top: 40px;
+      left: 0;
+      background: rgba(20,20,20,0.8);
+      border-radius: 6px;
+      padding: 6px;
+      max-height: auto;
+	  width: max-content;
+      overflow-y: scroll;   /* invece di auto */
+	  -webkit-overflow-scrolling: touch; /* per browser basati su WebKit */
+    }
+	
+    #menu button {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      background: none;
+      border: none;
+      color: #fff;
+      padding: 4px 6px;
+      text-align: left;
+      cursor: pointer;
+    }
+    #menu button:hover {
+      background: rgba(255,255,255,0.1);
+    }
+    #menu img {
+      width: 130px;
+      margin-right: 12px;
+    }
+	
+	#menu img[alt="Radio Montecarlo TV"] {
+	height: 110px;
+    width: auto;
+    margin-right: 50px;
+    margin-left: 35px;
+	}
+    .error {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      color: #ff6b6b;
+      font-weight: 600;
+      background: rgba(0,0,0,0.6);
+      padding: 6px 10px;
+      border-radius: 6px;
+      display: none;
+	}
+   span {
+ 	  visibility: hidden;
+	}
+	/* Mostra sempre il pulsante Play prima dell’avvio */
+  .vjs-big-play-button {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    z-index: 9999 !important;
+}
 
-    /* Mostra sempre il big play button */
-    .vjs-big-play-button {
-        display: flex !important;
-        align-items: center;
-        justify-content: center;
-        opacity: 1 !important;
-        visibility: visible !important;
-        z-index: 9999 !important;
-        width: 90px !important;
-        height: 90px !important;
-        border-radius: 50% !important;
-        background-color: rgba(0,0,0,0.4) !important;
-        border: 2px solid white !important;
-    }
+/* Nasconde il pulsante dopo che il video è partito */
+.vjs-has-started .vjs-big-play-button {
+    display: none !important;
+}
 
-    /* Ingrandisce l’icona Play */
-    .vjs-big-play-button .vjs-icon-placeholder:before {
-        font-size: 60px !important;
-        color: white !important;
-        line-height: 1 !important;
-    }
+/* Ingrandisce l’icona Play */
+.vjs-big-play-button .vjs-icon-placeholder:before {
+    font-size: 3em !important;
+}
 
-    /* Nasconde il pulsante dopo l’avvio */
-    .vjs-has-started .vjs-big-play-button {
-        display: none !important;
-    }
 
-    /* Dropdown canali */
-    #channelSelect {
-        position: fixed;
-        top: 10px;
-        left: 10px;
-        z-index: 99999;
-        padding: 10px;
-        font-size: 18px;
-    }
-</style>
+  </style>
 </head>
-
 <body>
+  <!-- Dropdown menu -->
+  <div id="dropdown">
+    <button onclick="toggleMenu()">📺</button>
+    <div id="menu" class="scroll-wrapper"></div>
+  </div>
 
-<select id="channelSelect">
-    <option value="">Seleziona un canale</option>
-</select>
+  <!-- Player Video.js fullscreen -->
+  <!-- <video id="video" class="video-js vjs-default-skin" controls preload="auto" playsinline></video> -->
+  <video id="video" class="video-js vjs-default-skin" 
+    controls preload="auto" playsinline
+    poster="https://upload.wikimedia.org/wikipedia/commons/3/3f/Play_button_icon.png">
+  </video>
 
-<!-- Player Video.js -->
-<video id="video" class="video-js vjs-default-skin" controls preload="auto" playsinline>
-    <source src="" type="video/mp4">
-</video>
 
-<!-- Video.js JS -->
-<script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+  <!-- Messaggi di errore -->
+  <div id="errorBox" class="error">Errore nel caricamento dello stream.</div>
 
-<script>
-    // Inizializza Video.js
+  <!-- JS Video.js + plugin DASH -->
+  <script src="https://vjs.zencdn.net/8.3.0/video.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/videojs-contrib-dash@latest/dist/videojs-dash.min.js"></script>
+
+  <script>
     const player = videojs('video');
+    const errorBox = document.getElementById('errorBox');
+    const menu = document.getElementById('menu');
 
+    function toggleMenu() {
+      menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+    }
 
-   // Lista canali con logo + nome
+    function loadStream(url) {
+      errorBox.style.display = 'none';
+      let type = "application/x-mpegURL"; // default HLS
+      if (url.endsWith(".mpd")) type = "application/dash+xml"; // DASH
+      	player.src(url);
+		player.poster(""); 
+		player.bigPlayButton.show();
+		player.removeClass('vjs-has-started');
+
+      player.ready(() => {
+        player.play().catch(err => console.warn("Autoplay bloccato:", err));
+      });
+    }
+
+    function showError(msg) {
+      errorBox.textContent = msg;
+      errorBox.style.display = 'block';
+    }
+
+    // Lista canali con logo + nome
     const channels = [
 		// Canali Svizzera
 		{name:"Radio Ticino", url:"https://2-fss-2.themediacdn.com/pl_124/amlst:204654-1927794/chunklist_b3500000.m3u8", logo:"https://radioticino.com/wp-content/uploads/2019/09/logob.png"},
@@ -122,21 +208,26 @@
 		{name:"Radio Montecarlo TV", url:"https://live03-col.msr.cdn.mediaset.net/live/ch-bb/bb-clr.isml/manifest.mpd", logo:"https://cdn.jsdelivr.net/gh/Tundrak/IPTV-Italia@master/logos/radiomontecarlotv.png"}
 	];
 
-    // Popola il menu (lo fai tu)
-    // channels.forEach(...)
-
-    // Cambio canale
-    document.getElementById("channelSelect").addEventListener("change", function () {
-        const url = this.value;
-        if (!url) return;
-
-        player.src(url);
-
-        // Forza la ricomparsa del pulsante Play
-        player.bigPlayButton.show();
-        player.removeClass('vjs-has-started');
+    // Popola il menu
+    channels.forEach((ch,i) => {
+      const btn = document.createElement("button");
+      btn.onclick = () => { loadStream(ch.url); toggleMenu(); };
+      const img = document.createElement("img");
+      img.src = ch.logo;
+      img.alt = ch.name;
+      btn.appendChild(img);
+      const label = document.createElement("span");
+      label.textContent = ch.name;
+      btn.appendChild(label);
+      menu.appendChild(btn);
+      if (i===0) loadStream(ch.url); // carica il primo canale
     });
-</script>
 
+    // Gestione errori Video.js
+    player.on('error', () => {
+      const err = player.error();
+      if (err) showError("Errore Video.js: " + err.message);
+    });
+  </script>
 </body>
 </html>
