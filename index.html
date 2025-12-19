@@ -93,7 +93,13 @@
 	}
    span {
  	  visibility: hidden;
-	}	
+	}
+	.vjs-big-play-button {
+    display: block !important;
+    opacity: 1 !important;
+    z-index: 9999 !important;
+	}
+
   </style>
 </head>
 <body>
@@ -104,7 +110,12 @@
   </div>
 
   <!-- Player Video.js fullscreen -->
-  <video id="video" class="video-js vjs-default-skin" controls preload="auto" playsinline></video>
+  <!-- <video id="video" class="video-js vjs-default-skin" controls preload="auto" playsinline></video> -->
+  <video id="video" class="video-js vjs-default-skin" 
+    controls preload="auto" playsinline
+    poster="https://upload.wikimedia.org/wikipedia/commons/3/3f/Play_button_icon.png">
+  </video>
+
 
   <!-- Messaggi di errore -->
   <div id="errorBox" class="error">Errore nel caricamento dello stream.</div>
@@ -203,6 +214,7 @@
   </script>
 </body>
 </html>
+
 
 
 
