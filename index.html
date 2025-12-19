@@ -94,11 +94,24 @@
    span {
  	  visibility: hidden;
 	}
-	.vjs-big-play-button {
+	/* Mostra sempre il pulsante Play prima dell’avvio */
+  .vjs-big-play-button {
     display: block !important;
     opacity: 1 !important;
+    visibility: visible !important;
     z-index: 9999 !important;
-	}
+}
+
+/* Nasconde il pulsante dopo che il video è partito */
+.vjs-has-started .vjs-big-play-button {
+    display: none !important;
+}
+
+/* Ingrandisce l’icona Play */
+.vjs-big-play-button .vjs-icon-placeholder:before {
+    font-size: 3em !important;
+}
+
 
   </style>
 </head>
@@ -137,7 +150,11 @@
       errorBox.style.display = 'none';
       let type = "application/x-mpegURL"; // default HLS
       if (url.endsWith(".mpd")) type = "application/dash+xml"; // DASH
-      player.src({ src: url, type: type });
+      	player.src(url);
+		player.poster(""); 
+		player.bigPlayButton.show();
+		player.removeClass('vjs-has-started');
+
       player.ready(() => {
         player.play().catch(err => console.warn("Autoplay bloccato:", err));
       });
@@ -214,6 +231,7 @@
   </script>
 </body>
 </html>
+
 
 
 
